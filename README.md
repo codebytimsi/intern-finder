@@ -48,7 +48,7 @@ internship-finder/
 ### 1. Clone the repository
 
 ```bash
-git clone YOUR_GITHUB_REPOSITORY_URL
+https://github.com/codebytimsi/intern-finder.git
 ```
 
 ### 2. Open the project folder
