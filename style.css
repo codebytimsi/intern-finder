@@ -1,0 +1,466 @@
+/* =========================
+   RESET
+========================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f8f9fc;
+    color: #1f2937;
+    line-height: 1.6;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button,
+input,
+select {
+    font: inherit;
+}
+
+
+/* =========================
+   CONTAINER
+========================= */
+
+.container {
+    width: min(1120px, 90%);
+    margin: 0 auto;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.header {
+    background: #ffffff;
+    border-bottom: 1px solid #e8eaf0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-container {
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.logo span {
+    color: #6366f1;
+}
+
+.navbar {
+    display: flex;
+    gap: 32px;
+}
+
+.navbar a {
+    color: #4b5563;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: 0.3s ease;
+}
+
+.navbar a:hover {
+    color: #6366f1;
+}
+
+
+/* =========================
+   HERO
+========================= */
+
+.hero {
+    padding: 100px 0 90px;
+    background: #eef0ff;
+}
+
+.hero-content {
+    text-align: center;
+}
+
+.hero-tag,
+.section-tag {
+    color: #6366f1;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+}
+
+.hero h1 {
+    max-width: 750px;
+    margin: 0 auto;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    line-height: 1.05;
+    letter-spacing: -2px;
+}
+
+.hero h1 span {
+    color: #6366f1;
+}
+
+.hero-description {
+    max-width: 600px;
+    margin: 24px auto 42px;
+    color: #5b6472;
+    font-size: 1.05rem;
+}
+
+
+/* =========================
+   SEARCH BOX
+========================= */
+
+.search-box {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 12px;
+    background: #ffffff;
+    border: 1px solid #e2e5ef;
+    border-radius: 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 10px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.07);
+}
+
+.search-input {
+    text-align: left;
+    padding: 8px 14px;
+}
+
+.search-input label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #6b7280;
+    margin-bottom: 3px;
+}
+
+.search-input input {
+    width: 100%;
+    border: none;
+    outline: none;
+    color: #1f2937;
+    background: transparent;
+}
+
+.search-input input::placeholder {
+    color: #9ca3af;
+}
+
+#searchBtn {
+    border: none;
+    padding: 0 24px;
+    border-radius: 11px;
+    background: #6366f1;
+    color: #ffffff;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+#searchBtn:hover {
+    background: #4f46e5;
+    transform: translateY(-1px);
+}
+
+
+/* =========================
+   FILTER SECTION
+========================= */
+
+.filters-section {
+    padding: 70px 0 25px;
+}
+
+.section-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.section-heading h2 {
+    font-size: 2rem;
+    letter-spacing: -0.8px;
+}
+
+.results-count {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.results-count span {
+    color: #111827;
+    font-weight: 700;
+}
+
+.filters {
+    margin-top: 28px;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.filters select {
+    min-width: 190px;
+    padding: 12px 15px;
+    border: 1px solid #dfe2ea;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #374151;
+    outline: none;
+    cursor: pointer;
+}
+
+.filters select:focus {
+    border-color: #6366f1;
+}
+
+
+/* =========================
+   INTERNSHIP CARDS
+========================= */
+
+.internship-section {
+    padding: 30px 0 90px;
+}
+
+.internship-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+}
+
+.internship-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 25px;
+    transition: 0.3s ease;
+}
+
+.internship-card:hover {
+    transform: translateY(-5px);
+    border-color: #c7c9ff;
+    box-shadow: 0 12px 30px rgba(99, 102, 241, 0.12);
+}
+
+
+.company-logo {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: #eef0ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6366f1;
+    font-weight: 800;
+    font-size: 16px;
+    margin-bottom: 20px;
+    border: 1px solid #e0e3ff;
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.08);
+}
+
+.internship-card h3 {
+    font-size: 1.15rem;
+    margin-bottom: 5px;
+}
+
+.company-name {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin-bottom: 18px;
+}
+
+.card-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 22px;
+}
+
+.detail-tag {
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: #f8f9ff;
+    border: 1px solid #e5e7eb;
+    color: #4b5563;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+.detail-tag:hover {
+    background: #eef0ff;
+    border-color: #d8dbff;
+}
+
+.apply-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 12px;
+    border-radius: 10px;
+    background: #111827;
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: 0.3s ease;
+}
+
+.apply-btn:hover {
+    background: #6366f1;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(99, 102, 241, 0.2);
+}
+
+
+/* =========================
+   NO RESULTS
+========================= */
+
+.no-results {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.no-results h3 {
+    margin-bottom: 8px;
+}
+
+.no-results p {
+    color: #6b7280;
+}
+
+
+/* =========================
+   ABOUT
+========================= */
+
+.about-section {
+    padding: 100px 0;
+    background: #ffffff;
+}
+
+.about-content {
+    max-width: 700px;
+}
+
+.about-content h2 {
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    line-height: 1.15;
+    letter-spacing: -1px;
+    margin-bottom: 20px;
+}
+
+.about-content > p:last-child {
+    color: #6b7280;
+    font-size: 1rem;
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+.footer {
+    background: #111827;
+    color: #ffffff;
+    padding: 28px 0;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    font-size: 0.8rem;
+    color: #9ca3af;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 900px) {
+
+    .internship-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .search-box {
+        grid-template-columns: 1fr;
+    }
+
+    #searchBtn {
+        min-height: 48px;
+    }
+}
+
+
+@media (max-width: 650px) {
+
+    .nav-container {
+        height: 64px;
+    }
+
+    .navbar {
+        gap: 15px;
+    }
+
+    .navbar a {
+        font-size: 0.8rem;
+    }
+
+    .hero {
+        padding: 75px 0 65px;
+    }
+
+    .hero h1 {
+        letter-spacing: -1px;
+    }
+
+    .section-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .internship-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filters select {
+        width: 100%;
+    }
+
+    .footer-content {
+        flex-direction: column;
+    }
+}
