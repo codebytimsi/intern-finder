@@ -3,9 +3,9 @@ const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const OPENINTERN_API_URL = "https://openintern.dev/api/v1/jobs";
+const OPENINTERN_API_URL =
+    "https://openintern.dev/api/v1/jobs";
 
-// Serve frontend files
 app.use(express.static(__dirname));
 
 
@@ -18,71 +18,185 @@ app.get("/api/jobs", async (req, res) => {
     try {
 
         const keyword =
-            (req.query.q || "").toLowerCase().trim();
+            (req.query.q || "")
+                .toLowerCase()
+                .trim();
 
-        let role = "software,frontend,fullstack";
+        let role =
+            "software,backend,frontend,fullstack,data,ml,product";
 
-        // Choose API role based on search
+        let shouldUseKeywordSearch = true;
+
+
+        // =========================
+        // WEB DEVELOPMENT
+        // =========================
+
         if (
+            keyword.includes("web development") ||
+            keyword.includes("web developer") ||
+            keyword === "web" ||
             keyword.includes("frontend") ||
             keyword.includes("front end") ||
+            keyword.includes("front-end") ||
             keyword.includes("react") ||
             keyword.includes("javascript") ||
-            keyword.includes("web")
+            keyword.includes("html") ||
+            keyword.includes("css")
         ) {
-            role = "frontend";
+
+            role = "frontend,fullstack";
+
+            shouldUseKeywordSearch = false;
         }
+
+
+        // =========================
+        // BACKEND
+        // =========================
 
         else if (
             keyword.includes("backend") ||
             keyword.includes("back end") ||
+            keyword.includes("back-end") ||
             keyword.includes("node") ||
             keyword.includes("java")
         ) {
+
             role = "backend";
+
+            shouldUseKeywordSearch = false;
         }
 
+
+        // =========================
+        // DATA
+        // =========================
+
         else if (
-            keyword.includes("data") ||
-            keyword.includes("analyst") ||
-            keyword.includes("analytics")
+            keyword.includes("data analytics") ||
+            keyword.includes("data analyst") ||
+            keyword.includes("data analysis") ||
+            keyword === "data" ||
+            keyword.includes("analytics") ||
+            keyword.includes("analyst")
         ) {
-            role = "data";
+
+            role = "data,ml";
+
+            shouldUseKeywordSearch = false;
         }
+
+
+        // =========================
+        // FULL STACK
+        // =========================
 
         else if (
             keyword.includes("fullstack") ||
             keyword.includes("full stack") ||
             keyword.includes("full-stack")
         ) {
+
             role = "fullstack";
+
+            shouldUseKeywordSearch = false;
         }
 
 
+        // =========================
+        // UI / UX
+        // =========================
+
+        else if (
+            keyword.includes("ui/ux") ||
+            keyword.includes("ui ux") ||
+            keyword.includes("ui designer") ||
+            keyword.includes("ux designer") ||
+            keyword.includes("user interface") ||
+            keyword.includes("user experience") ||
+            keyword.includes("product designer") ||
+            keyword.includes("interaction designer")
+        ) {
+
+            role = "product";
+
+            shouldUseKeywordSearch = false;
+        }
+
+
+        // =========================
+        // MARKETING
+        // =========================
+
+        else if (
+            keyword.includes("marketing") ||
+            keyword.includes("digital marketing") ||
+            keyword.includes("social media marketing")
+        ) {
+
+            // Marketing is not a dedicated OpenIntern
+            // role, so use a general search.
+            role = "software,product";
+
+            shouldUseKeywordSearch = true;
+        }
+
+
+        // =========================
+        // API PARAMETERS
+        // =========================
+
         const params = new URLSearchParams({
+
             role: role,
-            limit: "20"
+
+            // Request a larger pool
+            limit: "100"
         });
 
-        const duration = req.query.duration;
 
-            if (duration) {
-                params.append("duration_months", duration);
-            }
+        // =========================
+        // DURATION
+        // =========================
 
-        if (keyword) {
-            params.append("q", keyword);
+        const duration =
+            req.query.duration;
+
+        if (duration) {
+
+            params.append(
+                "duration_months",
+                duration
+            );
+        }
+
+
+        // =========================
+        // GENERAL SEARCH
+        // =========================
+
+        if (
+            keyword &&
+            shouldUseKeywordSearch
+        ) {
+
+            params.append(
+                "q",
+                keyword
+            );
         }
 
 
         console.log(
-            `Searching OpenIntern: keyword="${keyword}", role="${role}"`
+            `Searching OpenIntern: keyword="${keyword}", role="${role}", duration="${duration || "all"}"`
         );
 
 
-        const response = await fetch(
-            `${OPENINTERN_API_URL}?${params.toString()}`
-        );
+        const response =
+            await fetch(
+                `${OPENINTERN_API_URL}?${params.toString()}`
+            );
 
 
         if (!response.ok) {
@@ -95,10 +209,12 @@ app.get("/api/jobs", async (req, res) => {
                 errorText
             );
 
-            return res.status(response.status).json({
-                error:
-                    "Unable to fetch internships right now."
-            });
+            return res
+                .status(response.status)
+                .json({
+                    error:
+                        "Unable to fetch internships right now."
+                });
         }
 
 
@@ -117,8 +233,10 @@ app.get("/api/jobs", async (req, res) => {
         );
 
         res.status(500).json({
+
             error:
                 "Something went wrong while fetching internships."
+
         });
     }
 });

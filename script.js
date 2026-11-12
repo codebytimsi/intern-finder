@@ -3,6 +3,7 @@
 // =========================
 
 let internships = [];
+let apiFilteredByDuration = false;
 
 
 // =========================
@@ -38,6 +39,76 @@ const durationFilter =
 
 
 // =========================
+// CREATE INTERNSHIP OBJECT
+// =========================
+
+function createInternship(job, posting) {
+
+    const location =
+        posting.location || "Not specified";
+
+    const locationText =
+        location.toLowerCase();
+
+
+    // =========================
+    // DETECT WORK MODE
+    // =========================
+
+    let mode = "onsite";
+
+    if (
+        locationText.includes("hybrid")
+    ) {
+
+        mode = "hybrid";
+
+    } else if (
+        locationText.includes("remote")
+    ) {
+
+        mode = "remote";
+
+    }
+
+
+    return {
+
+        title:
+            job.title || "Internship",
+
+        company:
+            typeof job.company === "string"
+                ? job.company
+                : "Company",
+
+        location:
+            location,
+
+        mode:
+            mode,
+
+        category:
+            getCategory(
+                job.title || ""
+            ),
+
+        duration:
+            getDuration(job),
+
+        stipend:
+            "Not specified",
+
+        logo:
+            getLogo(job.company),
+
+        applyUrl:
+            posting.apply_url || "#"
+    };
+}
+
+
+// =========================
 // FETCH REAL INTERNSHIPS
 // =========================
 
@@ -49,79 +120,74 @@ async function loadInternships() {
         </p>
     `;
 
+
     try {
 
-        const response = await fetch("/api/jobs");
+        const response =
+            await fetch("/api/jobs");
+
 
         if (!response.ok) {
-            throw new Error("Failed to fetch internships");
+
+            throw new Error(
+                "Failed to fetch internships"
+            );
         }
 
-        const data = await response.json();
 
-        // OpenIntern groups jobs by role family.
-        // We flatten the postings into individual internships.
+        const data =
+            await response.json();
+
 
         internships = [];
 
+
+        if (
+            !data.jobs ||
+            data.jobs.length === 0
+        ) {
+
+            displayInternships([]);
+
+            return;
+        }
+
+
         data.jobs.forEach((job) => {
 
-            if (!job.postings || job.postings.length === 0) {
+            if (
+                !job.postings ||
+                job.postings.length === 0
+            ) {
+
                 return;
             }
 
+
             job.postings.forEach((posting) => {
 
-                const location =
-                    posting.location || "Not specified";
-
-                const mode =
-                    location.toLowerCase().includes("remote")
-                        ? "remote"
-                        : "onsite";
-
-                const category =
-                    getCategory(job.title);
-
-                const duration =
-                    getDuration(job);
-
-                internships.push({
-
-                    title: job.title || "Internship",
-
-                    company:
-                        typeof job.company === "string"
-                        ? job.company
-                        : "Company",
-
-                    location: location,
-
-                    mode: mode,
-
-                    category: category,
-
-                    duration: duration,
-
-                    stipend: "Not specified",
-
-                    logo: getLogo(job.company),
-
-                    applyUrl:
-                        posting.apply_url || "#"
-
-                });
+                internships.push(
+                    createInternship(
+                        job,
+                        posting
+                    )
+                );
 
             });
 
         });
+
 
         console.log(
             "Internships loaded:",
             internships.length
         );
 
+        apiFilteredByDuration = false;
+
+
         filterInternships();
+
 
     } catch (error) {
 
@@ -130,12 +196,14 @@ async function loadInternships() {
             error
         );
 
+
         internshipContainer.innerHTML = `
             <p style="text-align:center; padding:30px;">
                 Unable to load internships right now.
                 Please try again.
             </p>
         `;
+
 
         resultsCount.textContent = "0";
     }
@@ -148,7 +216,54 @@ async function loadInternships() {
 
 function getCategory(title) {
 
-    const value = title.toLowerCase();
+    const value =
+        title
+            .toLowerCase()
+            .trim();
+
+
+    // =========================
+    // DATA
+    // =========================
+
+    if (
+        value.includes("data") ||
+        value.includes("analytics") ||
+        value.includes("analyst") ||
+        value.includes("machine learning") ||
+        value.includes("machine-learning") ||
+        value.includes("artificial intelligence")
+    ) {
+
+        return "data";
+    }
+
+
+    // =========================
+    // UI / UX
+    // =========================
+
+    if (
+        value.includes("ui/ux") ||
+        value.includes("ui ux") ||
+        value.includes("ui designer") ||
+        value.includes("ux designer") ||
+        value.includes("user interface") ||
+        value.includes("user experience") ||
+        value.includes("product designer") ||
+        value.includes("product design") ||
+        value.includes("interaction designer") ||
+        value.includes("interaction design") ||
+        value.includes("digital design")
+    ) {
+
+        return "design";
+    }
+
+
+    // =========================
+    // WEB DEVELOPMENT
+    // =========================
 
     if (
         value.includes("frontend") ||
@@ -156,14 +271,22 @@ function getCategory(title) {
         value.includes("front end") ||
         value.includes("full stack") ||
         value.includes("full-stack") ||
+        value.includes("fullstack") ||
         value.includes("react") ||
         value.includes("javascript") ||
-        value.includes("web") ||
         value.includes("html") ||
-        value.includes("css")
+        value.includes("css") ||
+        value.includes("web developer") ||
+        value.includes("web development")
     ) {
+
         return "web-development";
     }
+
+
+    // =========================
+    // SOFTWARE / BACKEND
+    // =========================
 
     if (
         value.includes("backend") ||
@@ -174,31 +297,22 @@ function getCategory(title) {
         value.includes("developer") ||
         value.includes("engineering")
     ) {
+
         return "software-development";
     }
 
-    if (
-        value.includes("data") ||
-        value.includes("analytics") ||
-        value.includes("machine learning") ||
-        value.includes("ai")
-    ) {
-        return "data";
-    }
 
-    if (
-        value.includes("design") ||
-        value.includes("ui") ||
-        value.includes("ux")
-    ) {
-        return "design";
-    }
+    // =========================
+    // MARKETING
+    // =========================
 
     if (
         value.includes("marketing")
     ) {
+
         return "marketing";
     }
+
 
     return "software-development";
 }
@@ -221,6 +335,7 @@ function getDuration(job) {
 
     }
 
+
     return "Not specified";
 }
 
@@ -236,10 +351,16 @@ function getLogo(company) {
             ? company
             : "Company";
 
-    const words =
-        companyName.trim().split(/\s+/);
 
-    if (words.length >= 2) {
+    const words =
+        companyName
+            .trim()
+            .split(/\s+/);
+
+
+    if (
+        words.length >= 2
+    ) {
 
         return (
             words[0][0] +
@@ -247,6 +368,7 @@ function getLogo(company) {
         ).toUpperCase();
 
     }
+
 
     return companyName
         .substring(0, 2)
@@ -262,16 +384,23 @@ function displayInternships(data) {
 
     internshipContainer.innerHTML = "";
 
-    resultsCount.textContent = data.length;
+    resultsCount.textContent =
+        data.length;
 
-    if (data.length === 0) {
 
-        noResults.style.display = "block";
+    if (
+        data.length === 0
+    ) {
+
+        noResults.style.display =
+            "block";
 
         return;
     }
 
-    noResults.style.display = "none";
+
+    noResults.style.display =
+        "none";
 
 
     data.forEach((internship) => {
@@ -279,9 +408,11 @@ function displayInternships(data) {
         const card =
             document.createElement("article");
 
+
         card.classList.add(
             "internship-card"
         );
+
 
         card.innerHTML = `
 
@@ -328,7 +459,10 @@ function displayInternships(data) {
 
         `;
 
-        internshipContainer.appendChild(card);
+
+        internshipContainer.appendChild(
+            card
+        );
 
     });
 }
@@ -340,17 +474,29 @@ function displayInternships(data) {
 
 function formatMode(mode) {
 
-    if (mode === "remote") {
+    if (
+        mode === "remote"
+    ) {
+
         return "Remote";
     }
 
-    if (mode === "hybrid") {
+
+    if (
+        mode === "hybrid"
+    ) {
+
         return "Hybrid";
     }
 
-    if (mode === "onsite") {
+
+    if (
+        mode === "onsite"
+    ) {
+
         return "On-site";
     }
+
 
     return "Not specified";
 }
@@ -366,15 +512,17 @@ function formatDuration(duration) {
         !duration ||
         duration === "Not specified"
     ) {
+
         return "Not specified";
     }
+
 
     return `${duration} Months`;
 }
 
 
 // =========================
-// FILTER INTERNSHIPS
+// SEARCH + FILTER
 // =========================
 
 function filterInternships() {
@@ -384,119 +532,236 @@ function filterInternships() {
             .toLowerCase()
             .trim();
 
+
     const locationValue =
         locationInput.value
             .toLowerCase()
             .trim();
 
-    const categoryValue =
-        categoryFilter.value;
 
     const modeValue =
         modeFilter.value;
 
+
     const durationValue =
         durationFilter.value;
 
+    const categoryValue =
+    categoryFilter.value;
+
 
     const filteredInternships =
-        internships.filter((internship) => {
+        internships.filter(
+            (internship) => {
 
-           const matchesSearch =
 
-                internship.title
-                    .toLowerCase()
-                    .includes(searchValue) ||
-
-                internship.company
-                    .toLowerCase()
-                    .includes(searchValue) ||
-
-                internship.location
-                    .toLowerCase()
-                    .includes(searchValue) ||
-
-                (
-                    searchValue.includes("frontend") &&
-                    internship.category === "web-development"
-                ) ||
-
-                (
-                    searchValue.includes("react") &&
+                const title =
                     internship.title
-                        .toLowerCase()
-                        .includes("react")
-                ) ||
+                        .toLowerCase();
 
-                (
-                    searchValue.includes("backend") &&
+
+                const company =
+                    internship.company
+                        .toLowerCase();
+
+
+                const location =
+                    internship.location
+                        .toLowerCase();
+
+
+                // =========================
+                // SEARCH
+                // =========================
+
+                const matchesSearch =
+
+                    !searchValue ||
+
+                    title.includes(
+                        searchValue
+                    ) ||
+
+                    company.includes(
+                        searchValue
+                    ) ||
+
+                    location.includes(
+                        searchValue
+                    ) ||
+
+
                     (
-                        internship.title
-                            .toLowerCase()
-                            .includes("backend") ||
-                        internship.category === "software-development"
-                    )
-                ) ||
-
-                (
-                    searchValue.includes("software") &&
-                    internship.category === "software-development"
-                ) ||
-
-                (
-                    searchValue.includes("data") &&
-                    internship.category === "data"
-                ); 
+                        (
+                            searchValue.includes(
+                                "web development"
+                            ) ||
+                            searchValue.includes(
+                                "web developer"
+                            ) ||
+                            searchValue === "web"
+                        ) &&
+                        internship.category ===
+                            "web-development"
+                    ) ||
 
 
-            const matchesLocation =
-
-                internship.location
-                    .toLowerCase()
-                    .includes(locationValue);
-
-
-            const matchesCategory =
-
-                categoryValue === "all" ||
-
-                internship.category ===
-                categoryValue;
-
-
-            const matchesMode =
-
-                modeValue === "all" ||
-
-                internship.mode ===
-                modeValue;
+                    (
+                        (
+                            searchValue.includes(
+                                "frontend"
+                            ) ||
+                            searchValue.includes(
+                                "front end"
+                            ) ||
+                            searchValue.includes(
+                                "front-end"
+                            )
+                        ) &&
+                        internship.category ===
+                            "web-development"
+                    ) ||
 
 
-            const matchesDuration =
+                    (
+                        searchValue.includes(
+                            "react"
+                        ) &&
+                        title.includes(
+                            "react"
+                        )
+                    ) ||
 
-                durationValue === "all" ||
 
-                checkDuration(
-                    internship.duration,
-                    durationValue
+                    (
+                        (
+                            searchValue.includes(
+                                "backend"
+                            ) ||
+                            searchValue.includes(
+                                "back end"
+                            ) ||
+                            searchValue.includes(
+                                "back-end"
+                            )
+                        ) &&
+                        (
+                            title.includes(
+                                "backend"
+                            ) ||
+                            internship.category ===
+                                "software-development"
+                        )
+                    ) ||
+
+
+                    (
+                        (
+                            searchValue.includes(
+                                "data"
+                            ) ||
+                            searchValue.includes(
+                                "analytics"
+                            ) ||
+                            searchValue.includes(
+                                "analyst"
+                            )
+                        ) &&
+                        internship.category ===
+                            "data"
+                    ) ||
+
+
+                    (
+                        (
+                            searchValue.includes(
+                                "ui/ux"
+                            ) ||
+                            searchValue.includes(
+                                "ui ux"
+                            ) ||
+                            searchValue.includes(
+                                "ux"
+                            ) ||
+                            searchValue.includes(
+                                "ui"
+                            )
+                        ) &&
+                        internship.category ===
+                            "design"
+                    );
+
+
+                // =========================
+                // LOCATION
+                // =========================
+
+                const matchesLocation =
+
+                    !locationValue ||
+
+                    location.includes(
+                        locationValue
+                    );
+
+
+                // =========================
+                // CATEGORY
+                // =========================
+
+                const matchesCategory =
+
+                    categoryValue ===
+                        "all" ||
+
+                    internship.category ===
+                        categoryValue;
+
+
+                // =========================
+                // MODE
+                // =========================
+
+                const matchesMode =
+
+                    modeValue === "all" ||
+
+                    internship.mode ===
+                        modeValue;
+
+
+                // =========================
+                // DURATION
+                // =========================
+
+                const matchesDuration =
+
+    durationValue === "all" ||
+
+    apiFilteredByDuration ||
+
+    checkDuration(
+        internship.duration,
+        durationValue
+    );
+
+
+                return (
+
+                    matchesSearch &&
+
+                    matchesLocation &&
+
+                    matchesCategory &&
+
+                    matchesMode &&
+
+                    matchesDuration
+
                 );
 
-
-            return (
-
-                matchesSearch &&
-
-                matchesLocation &&
-
-                matchesCategory &&
-
-                matchesMode &&
-
-                matchesDuration
-
-            );
-
-        });
+            }
+        );
 
 
     displayInternships(
@@ -517,38 +782,48 @@ function checkDuration(
     const months =
         Number(duration);
 
+
     if (
         isNaN(months)
     ) {
+
         return false;
     }
+
 
     if (
         selectedDuration === "1-3"
     ) {
+
         return (
             months >= 1 &&
             months <= 3
         );
     }
 
+
     if (
         selectedDuration === "3-6"
     ) {
+
         return (
             months >= 3 &&
             months <= 6
         );
     }
 
+
     if (
         selectedDuration === "6+"
     ) {
+
         return months > 6;
     }
 
+
     return true;
 }
+
 
 // =========================
 // API SEARCH
@@ -557,15 +832,31 @@ function checkDuration(
 async function searchInternshipsFromAPI() {
 
     const searchValue =
-        searchInput.value.trim();
+        searchInput.value
+            .trim();
+
 
     const durationValue =
-    durationFilter.value;
+        durationFilter.value;
 
-   if (!searchValue && durationValue === "all") {
+    const categoryValue =
+    categoryFilter.value;
+
+
+    // No API search needed
+    // when there is no search/duration
+
+    if (
+    !searchValue &&
+    durationValue === "all" &&
+    categoryFilter.value === "all"
+) {
+
     loadInternships();
+
     return;
-    }
+}
+
 
     internshipContainer.innerHTML = `
         <p style="text-align:center; padding:30px;">
@@ -573,103 +864,162 @@ async function searchInternshipsFromAPI() {
         </p>
     `;
 
+
     try {
 
-        let apiUrl = "/api/jobs";
+        let apiUrl =
+            "/api/jobs";
 
-const params = new URLSearchParams();
 
-if (searchValue) {
-    params.append("q", searchValue);
-}
+        const params =
+            new URLSearchParams();
 
-if (durationValue !== "all") {
-    if (durationValue === "1-3") {
-        params.append("duration", "1,2,3");
-    }
 
-    else if (durationValue === "3-6") {
-        params.append("duration", "3,4,5,6");
-    }
+        let apiSearchValue = searchValue;
 
-    else if (durationValue === "6+") {
-        params.append(
-            "duration",
-            "7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24"
-        );
-    }
-}
 
-if (params.toString()) {
-    apiUrl += `?${params.toString()}`;
-}
+            // UI / UX category
+            if (
+                !searchValue &&
+                categoryValue === "design"
+            ) {
+                apiSearchValue = "product design";
+            }
 
-const response = await fetch(apiUrl);
 
-        if (!response.ok) {
-            throw new Error("Search failed");
+            // Marketing category
+            if (
+                !searchValue &&
+                categoryValue === "marketing"
+            ) {
+                apiSearchValue = "marketing";
+            }
+
+
+            if (
+                apiSearchValue
+            ) {
+
+                params.append(
+                    "q",
+                    apiSearchValue
+                );
+            }
+
+
+        // =========================
+        // DURATION
+        // =========================
+
+        if (
+            durationValue !== "all"
+        ) {
+
+            if (
+                durationValue === "1-3"
+            ) {
+
+                params.append(
+                    "duration",
+                    "1,2,3"
+                );
+
+            }
+
+
+            else if (
+                durationValue === "3-6"
+            ) {
+
+                params.append(
+                    "duration",
+                    "3,4,5,6"
+                );
+
+            }
+
+
+            else if (
+                durationValue === "6+"
+            ) {
+
+                params.append(
+                    "duration",
+                    "7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24"
+                );
+            }
         }
 
-        const data = await response.json();
+
+        if (
+            params.toString()
+        ) {
+
+            apiUrl +=
+                `?${params.toString()}`;
+        }
+
+
+        const response =
+            await fetch(apiUrl);
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Search failed"
+            );
+        }
+
+
+        const data =
+            await response.json();
+
 
         internships = [];
 
-        data.jobs.forEach((job) => {
 
-            if (!job.postings) {
-                return;
-            }
+        if (
+            data.jobs
+        ) {
 
-            job.postings.forEach((posting) => {
+            data.jobs.forEach(
+                (job) => {
 
-                const location =
-                    posting.location || "Not specified";
+                    if (
+                        !job.postings
+                    ) {
 
-                const mode =
-                    location
-                        .toLowerCase()
-                        .includes("remote")
-                        ? "remote"
-                        : "onsite";
+                        return;
+                    }
 
 
-                internships.push({
+                    job.postings.forEach(
+                        (posting) => {
 
-                    title:
-                        job.title || "Internship",
+                            internships.push(
+                                createInternship(
+                                    job,
+                                    posting
+                                )
+                            );
 
-                    company:
-                        typeof job.company === "string"
-                            ? job.company
-                            : "Company",
+                        }
+                    );
 
-                    location:
-                        location,
+                }
+            );
+        }
 
-                    mode:
-                        mode,
 
-                    category:
-                        getCategory(job.title || ""),
+        // After API search,
+        // apply local filters too.
 
-                    duration:
-                        getDuration(job),
+        apiFilteredByDuration =
+    durationValue !== "all";
 
-                    stipend:
-                        "Not specified",
+        filterInternships();
 
-                    logo:
-                        getLogo(job.company),
-
-                    applyUrl:
-                        posting.apply_url || "#"
-                });
-
-            });
-
-        });
-
-        displayInternships(internships);
 
     } catch (error) {
 
@@ -678,13 +1028,16 @@ const response = await fetch(apiUrl);
             error
         );
 
+
         internshipContainer.innerHTML = `
             <p style="text-align:center; padding:30px;">
                 Unable to search internships right now.
             </p>
         `;
 
-        resultsCount.textContent = "0";
+
+        resultsCount.textContent =
+            "0";
     }
 }
 
@@ -697,6 +1050,7 @@ searchBtn.addEventListener(
     "click",
     searchInternshipsFromAPI
 );
+
 
 searchInput.addEventListener(
     "input",
@@ -712,7 +1066,7 @@ locationInput.addEventListener(
 
 categoryFilter.addEventListener(
     "change",
-    filterInternships
+    searchInternshipsFromAPI
 );
 
 
